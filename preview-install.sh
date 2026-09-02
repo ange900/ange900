@@ -18,7 +18,7 @@
 set -eu
 
 PREVIEW_URL="${O11_PREVIEW_URL:-https://raw.githubusercontent.com/ange900/ange900/main/preview/panel-preview.tar.gz}"
-SHA_ATTENDU="027e9a78cf2e29ec843b94e92f57f42b77f523ea578c89cb5b1ad5bfee919319"
+SHA_ATTENDU="07cacce298733a40cf4f5a3e8c5b6200b3e11393486f9f6c4132db074e2cc0cf"
 PREFIX="${O11_PREFIX:-/opt/o11-panel}"
 SERVICE="o11-panel"
 
