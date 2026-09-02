@@ -1,0 +1,87 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Rien de ce qui suit ne doit JAMAIS quitter cette machine.
+#
+# Le dépôt ne sert qu'à l'installation : install.sh, install-panel.py, son
+# empreinte et la documentation. Tout le reste — le binaire, le bac à sable,
+# les relevés d'analyse — est du matériel de travail local.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Le binaire d'O11 Pro et tout ce qui en dérive.
+o11pro
+o11pro.*
+*.elf
+
+# Le bac à sable : il contient la configuration RÉELLE d'une instance, ses
+# jetons de session, ses journaux, ses clés et ses enregistrements.
+run/
+o11.cfg
+o11-job.cfg
+o11-rec.cfg
+keys.txt
+providers/
+hls/
+epg/
+rec/
+recordings/
+vod/
+logs/
+offair/
+manifests/
+dl/
+overlay/
+fonts/
+logos/
+
+# Secrets, sous toutes leurs formes.
+*.key
+*.pem
+*.p12
+*.pfx
+*.crt
+*.jks
+id_rsa*
+id_ed25519*
+*.token
+*token*.txt
+*jeton*.txt
+.env
+.env.*
+*.secret
+*credentials*
+*.netrc
+.netrc
+cookies.txt
+*.session
+
+# Clés et matériel DRM / CDM — jamais, sous aucune forme.
+*.wvd
+*device_client_id*
+*device_private_key*
+cdm/
+widevine/
+*kid*key*
+
+# Relevés d'analyse : ils contiennent le bundle désobfusqué du panel
+# propriétaire, des captures d'écran et des jetons de sonde.
+analysis/
+extracted/
+frontend-original/
+
+# Sauvegardes.
+*.precedent
+*.bak
+*.backup
+*.old
+*.orig
+*.tar
+*.tar.gz
+*.tgz
+*.zip
+
+# Fabrication.
+node_modules/
+frontend-modern/node_modules/
+frontend-modern/dist/
+__pycache__/
+*.pyc
+.DS_Store
