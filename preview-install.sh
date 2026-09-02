@@ -7,9 +7,13 @@
 # de cette preview parle à un moteur qui vit dans le service : poser l'interface
 # seule afficherait un bandeau « Auto EPG » en erreur.
 #
-#   dist/                   l'interface
-#   proxy-o11-panel.py      il expose /__panel/epg-auto et lance le moteur
-#   moteur-epg.py           le moteur lui-même (fichier nouveau)
+#   dist/                   l'interface, lecteur HLS compris
+#   proxy-o11-panel.py      il expose /__panel/epg-auto, lance le moteur EPG,
+#                           et relaie `/output/` d'o11-rebuild avec la session
+#   moteur-epg.py           le moteur EPG (fichier nouveau)
+#   adaptateur-rebuild.py   il rend désormais une adresse de lecture RELATIVE,
+#                           sans quoi le navigateur sortirait de l'origine du
+#                           panel et o11-rebuild répondrait 401
 #
 # Il ajoute aussi UN réglage au service : `StateDirectory=o11-panel`, par un
 # drop-in systemd. Sans lui, `ProtectSystem=strict` ne laisse aucun chemin
@@ -31,7 +35,7 @@
 set -eu
 
 PREVIEW_URL="${O11_PREVIEW_URL:-https://raw.githubusercontent.com/ange900/ange900/main/preview/panel-preview.tar.gz}"
-SHA_ATTENDU="ac267c5c171ab326d2ae17019e00ab878aa25d2f5ae63350111c989ab5eeda7d"
+SHA_ATTENDU="c1a93370c41320859609dcea1eb4cda04e48a2a3a53d49ffb1681d33cfb4bb44"
 PREFIX="${O11_PREFIX:-/opt/o11-panel}"
 SERVICE="o11-panel"
 DROPIN="${O11_DROPIN:-/etc/systemd/system/o11-panel.service.d/10-etat-epg.conf}"
@@ -89,6 +93,12 @@ if [ "$ACTION" = rollback ]; then
     mv "$PREFIX/proxy-o11-panel.py.preview" "$PREFIX/proxy-o11-panel.py.precedent"
     ok "service précédent restauré"
   fi
+  if [ -f "$PREFIX/adaptateur-rebuild.py.precedent" ]; then
+    mv "$PREFIX/adaptateur-rebuild.py" "$PREFIX/adaptateur-rebuild.py.preview"
+    mv "$PREFIX/adaptateur-rebuild.py.precedent" "$PREFIX/adaptateur-rebuild.py"
+    mv "$PREFIX/adaptateur-rebuild.py.preview" "$PREFIX/adaptateur-rebuild.py.precedent"
+    ok "couche de compatibilité précédente restaurée"
+  fi
   # `moteur-epg.py` reste : il n'est chargé que si le proxy le demande, et le
   # proxy précédent ne le demande pas. L'effacer casserait un retour en avant.
   if [ -f "$DROPIN" ]; then
@@ -130,11 +140,13 @@ tar -xzf "$TEMPO/preview.tar.gz" -C "$TEMPO/x" || echec "archive illisible"
 [ -f "$TEMPO/x/dist/index.html" ] || echec "l'archive ne contient pas un panel"
 [ -f "$TEMPO/x/serveur/proxy-o11-panel.py" ] || echec "l'archive ne contient pas le service"
 [ -f "$TEMPO/x/serveur/moteur-epg.py" ] || echec "l'archive ne contient pas le moteur EPG"
+[ -f "$TEMPO/x/serveur/adaptateur-rebuild.py" ] || echec "l'archive ne contient pas la couche de compatibilité"
 # Un fichier Python qui ne compile pas laisserait le service mort au
 # redémarrage. On le vérifie AVANT de toucher à quoi que ce soit.
 if command -v python3 >/dev/null 2>&1; then
   python3 -m py_compile "$TEMPO/x/serveur/proxy-o11-panel.py" \
                         "$TEMPO/x/serveur/moteur-epg.py" \
+                        "$TEMPO/x/serveur/adaptateur-rebuild.py" \
     || echec "le service de la preview ne compile pas. Rien n'a été touché."
   ok "service de la preview : compile"
 fi
@@ -148,7 +160,11 @@ mv "$TEMPO/x/dist" "$PREFIX/dist"
 cp -f "$PREFIX/proxy-o11-panel.py" "$PREFIX/proxy-o11-panel.py.precedent" 2>/dev/null || true
 cp -f "$TEMPO/x/serveur/proxy-o11-panel.py" "$PREFIX/proxy-o11-panel.py"
 cp -f "$TEMPO/x/serveur/moteur-epg.py" "$PREFIX/moteur-epg.py"
-chmod 0644 "$PREFIX/proxy-o11-panel.py" "$PREFIX/moteur-epg.py"
+# La couche de compatibilité ne concerne qu'o11-rebuild ; on la conserve aussi
+# en `.precedent`, parce qu'on la remplace.
+cp -f "$PREFIX/adaptateur-rebuild.py" "$PREFIX/adaptateur-rebuild.py.precedent" 2>/dev/null || true
+cp -f "$TEMPO/x/serveur/adaptateur-rebuild.py" "$PREFIX/adaptateur-rebuild.py"
+chmod 0644 "$PREFIX/proxy-o11-panel.py" "$PREFIX/moteur-epg.py" "$PREFIX/adaptateur-rebuild.py"
 ok "preview posée ; interface et service précédents conservés en .precedent"
 
 # Le seul chemin d'écriture dont le moteur a besoin. Sans lui, le journal des
@@ -169,7 +185,8 @@ systemctl restart "$SERVICE" 2>/dev/null && ok "service $SERVICE redémarré" \
   || info "service non géré ici : recharger la page suffit"
 
 PORT=$(sed -n 's/.*"port"[^0-9]*\([0-9]*\).*/\1/p' "$PREFIX/etat.json" 2>/dev/null | head -1)
-printf '\n  %sPreview en place.%s  http://<cette-machine>:%s/epg/\n' "$V" "$N" "${PORT:-8080}"
+printf '\n  %sPreview en place.%s  http://<cette-machine>:%s/linear/\n' "$V" "$N" "${PORT:-8080}"
+printf '\n  Le lecteur : cliquer l'\''icône TV bleue d'\''une carte Linear, Events ou VOD.\n'
 printf '\n  L'\''auto EPG tourne dans le service, toutes les 6 h, sans navigateur.\n'
 printf '  Il démarre dès la première connexion d'\''un administrateur ; pour ne\n'
 printf '  dépendre d'\''aucune connexion, poser O11_AUTO_TOKEN sur le service.\n'
