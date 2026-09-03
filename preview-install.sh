@@ -35,7 +35,7 @@
 set -eu
 
 PREVIEW_URL="${O11_PREVIEW_URL:-https://raw.githubusercontent.com/ange900/ange900/main/preview/panel-preview.tar.gz}"
-SHA_ATTENDU="58f4376b6a97feb3ba63c29f8053c007114b02d5864f33279e39e7a8793f040b"
+SHA_ATTENDU="ce5b59762dc88f6e9a2ce3c5cc278847f8c0ec917f8a7e605c16acfaae9a02f9"
 PREFIX="${O11_PREFIX:-/opt/o11-panel}"
 SERVICE="o11-panel"
 DROPIN="${O11_DROPIN:-/etc/systemd/system/o11-panel.service.d/10-etat-epg.conf}"
