@@ -20,7 +20,7 @@ set -eu
 # ═══════════════════════════════════════════════════════════════════════════
 # L'EMPLACEMENT OFFICIEL — le seul endroit à changer pour publier ailleurs.
 # ═══════════════════════════════════════════════════════════════════════════
-PANEL_VERSION="1.3.0"
+PANEL_VERSION="1.3.1"
 BASE_URL="https://raw.githubusercontent.com/ange900/ange900/main"
 
 INSTALLER_URL="${O11_INSTALLER_URL:-$BASE_URL/install-panel.py}"
