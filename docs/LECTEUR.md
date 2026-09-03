@@ -70,10 +70,20 @@ dépendre de rien.
   lit directement, sans hls.js.
 * **VOD** : un titre porte **sa propre** `StreamingUrl`. Rien à fabriquer, et
   surtout pas un lien vers `vod.m3u`, qui est la liste du catalogue entier.
-* **Events** : l'original emploie `StreamingUrl` même à l'antenne, et ne
-  réserve `StreamingOnAirUrl` qu'au menu « Links ». **On s'en écarte sur
-  consigne** : à l'antenne (`OnAirId` non vide) et si une adresse existe, on
-  sert `StreamingOnAirUrl`. Dites-le si vous préférez le comportement d'origine.
+* **Events** : le lecteur prend **toujours `StreamingUrl`**, y compris pour un
+  événement en diffusion — c'est ce que fait l'original, et c'est aussi la
+  bonne décision technique. Mesuré sur un événement réellement en diffusion :
+
+  ```
+  StreamingUrl      → /stream/sonde/event1/master.m3u8   HTTP 200
+  StreamingOnAirUrl → /stream/sonde/onair0/master.m3u8   HTTP 404
+  ```
+
+  `StreamingOnAirUrl` vit dans un **menu séparé**. Relevé sur le bundle : la
+  carte rend `<OutputLinksM3us name="Links">` (→ `StreamingUrl`) et, **si et
+  seulement si** `event.OnAirId` est renseigné, un second
+  `<OutputLinksM3us onair name="OnAir">` (→ `StreamingOnAirUrl`). « Links » ne
+  bascule donc jamais sur l'antenne : le menu « OnAir » s'ajoute à côté.
 
 Aucune adresse n'est construite par le panel. Celles-ci viennent du serveur,
 jeton compris.
@@ -181,7 +191,9 @@ Décodage réel exigé partout : `videoWidth > 0`, `readyState ≥ 2`, et un
 `currentTime` qui avance.
 
 * **Linear, O11 Pro** : 343 × 180, readyState 4, +5 s en 5 s.
-* **Events, O11 Pro** : 343 × 180, lecture qui progresse.
+* **Events, O11 Pro**, sur un événement **réellement en diffusion**
+  (`IsStreaming: true`) : 343 × 180, readyState 4, lecture qui progresse,
+  0 erreur console, et **aucune requête vers `onair`**.
 * **Linear, o11-rebuild rc30** : 343 × 180, readyState 4, manifeste et
   segments en 200 avec la session, 401 sans.
 * **20 ouvertures/fermetures** : 0 requête résiduelle, 0 exception, un seul
