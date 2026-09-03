@@ -35,7 +35,7 @@
 set -eu
 
 PREVIEW_URL="${O11_PREVIEW_URL:-https://raw.githubusercontent.com/ange900/ange900/main/preview/panel-preview.tar.gz}"
-SHA_ATTENDU="b104b2b7510c62d3cf463eab089cc51344dd8deb422a96ae83d28077ea9aba7e"
+SHA_ATTENDU="b4d9b30773b3cd893895c56f149b4741365df071bbc46b3cc2d9f16a0a7f0206"
 PREFIX="${O11_PREFIX:-/opt/o11-panel}"
 SERVICE="o11-panel"
 DROPIN="${O11_DROPIN:-/etc/systemd/system/o11-panel.service.d/10-etat-epg.conf}"
@@ -191,4 +191,4 @@ printf '\n  L'\''auto EPG tourne dans le service, toutes les 6 h, sans navigateu
 printf '  Il démarre dès la première connexion d'\''un administrateur ; pour ne\n'
 printf '  dépendre d'\''aucune connexion, poser O11_AUTO_TOKEN sur le service.\n'
 printf '  État : http://<cette-machine>:%s/__panel/epg-auto\n' "${PORT:-8080}"
-printf '\n  Retour arrière :\n    sudo sh %s --rollback\n\n' "$0"
+printf '\n  Retour arrière :\n    curl -fsSL https://raw.githubusercontent.com/ange900/ange900/main/preview-install.sh | sudo sh -s -- --rollback\n\n'
