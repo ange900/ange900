@@ -24,8 +24,8 @@
 set -eu
 
 # ─────────────────────────────────────────────────────── ce qu'on installe
-VERSION_CIBLE="0.1.0-rc30"
-SHA_CIBLE="be4c22cb842b0346129ea3dbad4cbc309ece512515655b6b459a1e53233e5200"
+VERSION_CIBLE="0.1.0-rc31"
+SHA_CIBLE="d33ae163bfb136c011e537902f9b8c60ccf27860449da4e3460820e3a54b2f4b"
 
 # L'URL n'existe qu'ICI. Tout le reste s'en déduit.
 BASE_URL="${O11R_BASE_URL:-https://raw.githubusercontent.com/ange900/ange900/main/backend}"
